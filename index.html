@@ -3,135 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anticor Center</title>
+    <title>Anticor Center Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-theme-bg-color: #ffffff;
-            --tg-theme-secondary-bg-color: #f0f0f5;
-            --tg-theme-text-color: #222222;
-            --tg-theme-hint-color: #999999;
-            --accent-color: #e67e22; 
+            --bg-color: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-color: #ffffff;
+            --accent-color: #f39c12; 
+            --secondary-text: #aaaaaa;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--tg-theme-secondary-bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 0; padding: 0; user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 0;
+            line-height: 1.5;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
+
+        /* Шапка с кнопкой звонка */
         .header {
-            background: #1c1c1c; color: white; padding: 20px 16px; display: flex;
-            justify-content: space-between; align-items: center;
+            padding: 30px 20px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            text-align: center;
+            border-bottom: 1px solid #222;
         }
-        .header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+
+        .header h1 {
+            margin: 0; font-size: 22px; letter-spacing: 2px;
+            color: var(--accent-color); text-transform: uppercase;
+        }
+
         .call-btn {
-            background: var(--accent-color); border: none; padding: 8px 12px;
-            border-radius: 20px; color: white; font-size: 12px; font-weight: bold; text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+            transition: transform 0.2s;
         }
-        .container { padding: 12px; }
-        .gallery-label { font-size: 13px; color: var(--tg-theme-hint-color); margin: 10px 0 5px 4px; text-transform: uppercase; }
-        .gallery-scroll {
-            display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px;
-            scrollbar-width: none;
+
+        .call-btn:active { transform: scale(0.95); }
+
+        .container { padding: 20px; padding-bottom: 40px; }
+
+        .section-title {
+            font-size: 11px; color: var(--secondary-text);
+            text-transform: uppercase; letter-spacing: 1.5px;
+            margin-bottom: 12px; margin-left: 5px;
         }
-        .gallery-scroll::-webkit-scrollbar { display: none; }
-        .work-card {
-            min-width: 200px; height: 120px; background: #ddd; border-radius: 12px; flex-shrink: 0;
-            background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 10px;
-            color: white; font-weight: bold; font-size: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+
+        /* Сетка выбора авто */
+        .car-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            margin-bottom: 30px;
         }
-        .section {
-            background: var(--tg-theme-bg-color); border-radius: 16px; padding: 16px; margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        }
-        h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 700; }
-        .car-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
         .car-item {
-            padding: 12px; border: 1.5px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 12px; text-align: center; transition: all 0.2s;
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 20px 10px;
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        .car-item.active { border-color: var(--accent-color); background: rgba(230, 126, 34, 0.05); }
-        .package-select { display: flex; flex-direction: column; gap: 10px; }
-        .package-option {
-            padding: 12px; border: 1.5px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+
+        .car-item.active {
+            border-color: var(--accent-color);
+            background: rgba(243, 156, 18, 0.05);
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.1);
         }
-        .package-option.active { border-color: var(--accent-color); }
-        .package-name { font-weight: 600; font-size: 14px; }
-        .package-price { color: var(--accent-color); font-weight: 700; }
-        input, textarea {
-            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px;
-            background: var(--tg-theme-secondary-bg-color); font-size: 16px; box-sizing: border-box; margin-top: 5px;
+
+        .car-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+        .car-name { font-size: 14px; font-weight: 500; }
+
+        /* Пакеты услуг */
+        .package-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+
+        .package-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .package-card.active {
+            border-color: var(--accent-color);
+            background: #222;
+        }
+
+        .pkg-info div { font-weight: bold; font-size: 16px; margin-bottom: 2px; }
+        .pkg-info span { font-size: 12px; color: var(--secondary-text); }
+        .pkg-price { color: var(--accent-color); font-weight: 800; font-size: 17px; }
+
+        /* Поля ввода */
+        .input-group { margin-bottom: 20px; }
+        
+        input[type="date"], textarea {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            font-size: 16px;
+            margin-top: 8px;
+            box-sizing: border-box;
+            outline: none;
+            font-family: inherit;
+        }
+
+        textarea { height: 90px; resize: none; }
+        input:focus, textarea:focus { border-color: var(--accent-color); }
+
+        /* Кастомный календарь для темной темы */
+        input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
         }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <div>
-            <h1>ANTICOR PRO</h1>
-            <div style="font-size: 10px; opacity: 0.6;">Защита кузова с гарантией</div>
-        </div>
-        <a href="tel:+79991234567" class="call-btn">ПОЗВОНИТЬ</a>
+        <h1>MERCASOL PRO</h1>
+        <div style="font-size: 11px; color: var(--secondary-text); margin-top: 6px; letter-spacing: 1px;">ЦЕНТР АНТИКОРРОЗИЙНОЙ ЗАЩИТЫ</div>
+        
+        <a href="tel:+79623133313" class="call-btn">
+            📞 ПОЗВОНИТЬ МАСТЕРУ
+        </a>
     </div>
+
     <div class="container">
-        <div class="gallery-label">Примеры наших работ:</div>
-        <div class="gallery-scroll">
-            <div class="work-card" style="background-image: url('https://placehold.co/400x300/222/fff?text=Photo+1')">Toyota Land Cruiser</div>
-            <div class="work-card" style="background-image: url('https://placehold.co/400x300/333/fff?text=Photo+2')">BMW X5</div>
-            <div class="work-card" style="background-image: url('https://placehold.co/400x300/444/fff?text=Photo+3')">Гарантия</div>
-        </div>
-        <div class="section">
-            <h3>Тип кузова</h3>
-            <div class="car-grid">
-                <div class="car-item active" onclick="setCar('Легковая', 0, this)"><div>🚗 Седан</div></div>
-                <div class="car-item" onclick="setCar('Кроссовер', 5000, this)"><div>🚙 SUV</div></div>
-                <div class="car-item" onclick="setCar('Рамник', 9000, this)"><div>🚜 Рамный</div></div>
-                <div class="car-item" onclick="setCar('Автобус', 12000, this)"><div>🚐 Бус</div></div>
+        <div class="section-title">Класс автомобиля</div>
+        <div class="car-grid">
+            <div class="car-item active" onclick="setCar('Легковая', 0, this)">
+                <span class="car-icon">🚗</span>
+                <div class="car-name">Седан</div>
+            </div>
+            <div class="car-item" onclick="setCar('Кроссовер', 5000, this)">
+                <span class="car-icon">🚙</span>
+                <div class="car-name">Кроссовер</div>
+            </div>
+            <div class="car-item" onclick="setCar('Рамник', 9000, this)">
+                <span class="car-icon">🚜</span>
+                <div class="car-name">Внедорожник</div>
+            </div>
+            <div class="car-item" onclick="setCar('Автобус', 12000, this)">
+                <span class="car-icon">🚐</span>
+                <div class="car-name">Микроавтобус</div>
             </div>
         </div>
-        <div class="section">
-            <h3>Пакет обработки</h3>
-            <div class="package-select">
-                <div class="package-option active" onclick="setPackage('Стандарт', 15000, this)">
-                    <span class="package-name">Днище + Арки</span><span class="package-price">15 000 ₽</span>
+
+        <div class="section-title">Комплекс услуг</div>
+        <div class="package-list">
+            <div class="package-card active" onclick="setPackage('Стандарт', 15000, this)">
+                <div class="pkg-info">
+                    <div>Стандарт</div>
+                    <span>Днище + Арки</span>
                 </div>
-                <div class="package-option" onclick="setPackage('Премиум', 26000, this)">
-                    <span class="package-name">Полный</span><span class="package-price">26 000 ₽</span>
+                <div class="pkg-price">15 000 ₽</div>
+            </div>
+            <div class="package-card" onclick="setPackage('Премиум', 26000, this)">
+                <div class="pkg-info">
+                    <div>Премиум</div>
+                    <span>Днище + Арки + Скрытые полости</span>
                 </div>
+                <div class="pkg-price">26 000 ₽</div>
             </div>
         </div>
-        <div class="section">
-            <h3>Желаемая дата и модель</h3>
+
+        <div class="input-group">
+            <div class="section-title">Желаемая дата визита</div>
             <input type="date" id="date_input">
-            <textarea id="car_model" placeholder="Марка и модель авто..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <div class="section-title">Марка и модель авто</div>
+            <textarea id="car_model" placeholder="Например: Toyota Land Cruiser 300, 2023 г.в."></textarea>
         </div>
     </div>
+
     <script>
         let tg = window.Telegram.WebApp;
-        let carPrice = 0; let packagePrice = 15000;
-        let selectedCar = "Легковая"; let selectedPackage = "Стандарт";
+        let carPrice = 0;
+        let packagePrice = 15000;
+        let selectedCar = "Легковая";
+        let selectedPackage = "Стандарт";
+
         tg.expand();
-        tg.MainButton.setParams({ text: 'ЗАПИСАТЬСЯ: 15 000 ₽', color: '#e67e22', is_visible: true });
-        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+        tg.enableClosingConfirmation();
+        
+        // Настройка главной кнопки Telegram
+        tg.MainButton.setParams({
+            text: 'ЗАПИСАТЬСЯ: 15 000 ₽',
+            color: '#f39c12',
+            text_color: '#ffffff',
+            is_visible: true
+        });
+
+        // Установка даты (минимум — завтра)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
         document.getElementById('date_input').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('date_input').setAttribute('min', tomorrow.toISOString().split('T')[0]);
+
         function setCar(name, price, el) {
             document.querySelectorAll('.car-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active'); carPrice = price; selectedCar = name;
-            tg.HapticFeedback.impactOccurred('light'); updateUI();
+            el.classList.add('active');
+            carPrice = price;
+            selectedCar = name;
+            tg.HapticFeedback.impactOccurred('medium');
+            updateUI();
         }
+
         function setPackage(name, price, el) {
-            document.querySelectorAll('.package-option').forEach(i => i.classList.remove('active'));
-            el.classList.add('active'); packagePrice = price; selectedPackage = name;
-            tg.HapticFeedback.impactOccurred('medium'); updateUI();
+            document.querySelectorAll('.package-option, .package-card').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            packagePrice = price;
+            selectedPackage = name;
+            tg.HapticFeedback.selectionChanged();
+            updateUI();
         }
+
         function updateUI() {
             const total = carPrice + packagePrice;
             tg.MainButton.setText(`ЗАПИСАТЬСЯ: ${total.toLocaleString()} ₽`);
         }
+
+        // Логика отправки данных
         tg.MainButton.onClick(function() {
-            const model = document.getElementById('car_model').value;
-            if (model.length < 3) { tg.showAlert("Введите марку авто"); return; }
-            const data = { car: selectedCar, model: model, package: selectedPackage, date: document.getElementById('date_input').value, total: (carPrice + packagePrice) };
+            const model = document.getElementById('car_model').value.trim();
+            if (model.length < 3) {
+                tg.showAlert("Пожалуйста, введите марку и модель вашего автомобиля.");
+                return;
+            }
+            
+            const data = {
+                car: selectedCar,
+                model: model,
+                package: selectedPackage,
+                date: document.getElementById('date_input').value,
+                total: (carPrice + packagePrice)
+            };
+            
             tg.sendData(JSON.stringify(data));
         });
     </script>
