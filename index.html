@@ -24,7 +24,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Шапка с кнопкой звонка */
+        /* Шапка */
         .header {
             padding: 30px 20px;
             background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
@@ -37,10 +37,10 @@
             color: var(--accent-color); text-transform: uppercase;
         }
 
+        /* Кнопка звонка */
         .call-btn {
             display: inline-block;
             margin-top: 15px;
-            text-decoration: none;
             background: var(--accent-color);
             color: white;
             padding: 10px 25px;
@@ -48,9 +48,9 @@
             font-weight: bold;
             font-size: 14px;
             box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+            cursor: pointer;
             transition: transform 0.2s;
         }
-
         .call-btn:active { transform: scale(0.95); }
 
         .container { padding: 20px; padding-bottom: 40px; }
@@ -73,13 +73,14 @@
             border-radius: 16px;
             padding: 20px 10px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .car-item.active {
             border-color: var(--accent-color);
             background: rgba(243, 156, 18, 0.05);
-            box-shadow: 0 0 20px rgba(243, 156, 18, 0.1);
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.1);
         }
 
         .car-icon { font-size: 28px; margin-bottom: 8px; display: block; }
@@ -96,7 +97,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            cursor: pointer;
         }
 
         .package-card.active {
@@ -106,7 +108,9 @@
 
         .pkg-info div { font-weight: bold; font-size: 16px; margin-bottom: 2px; }
         .pkg-info span { font-size: 12px; color: var(--secondary-text); }
-        .pkg-price { color: var(--accent-color); font-weight: 800; font-size: 17px; }
+        
+        /* Цены, которые будут меняться через JS */
+        .pkg-price { color: var(--accent-color); font-weight: 800; font-size: 17px; min-width: 80px; text-align: right; }
 
         /* Поля ввода */
         .input-group { margin-bottom: 20px; }
@@ -127,11 +131,8 @@
 
         textarea { height: 90px; resize: none; }
         input:focus, textarea:focus { border-color: var(--accent-color); }
-
-        /* Кастомный календарь для темной темы */
-        input::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
+        
+        input::-webkit-calendar-picker-indicator { filter: invert(1); }
     </style>
 </head>
 <body>
@@ -140,9 +141,9 @@
         <h1>MERCASOL PRO</h1>
         <div style="font-size: 11px; color: var(--secondary-text); margin-top: 6px; letter-spacing: 1px;">ЦЕНТР АНТИКОРРОЗИЙНОЙ ЗАЩИТЫ</div>
         
-        <a href="tel:+79623133313" class="call-btn">
+        <div class="call-btn" onclick="makeCall()">
             📞 ПОЗВОНИТЬ МАСТЕРУ
-        </a>
+        </div>
     </div>
 
     <div class="container">
@@ -173,14 +174,14 @@
                     <div>Стандарт</div>
                     <span>Днище + Арки</span>
                 </div>
-                <div class="pkg-price">15 000 ₽</div>
+                <div class="pkg-price" id="price-std">15 000 ₽</div>
             </div>
             <div class="package-card" onclick="setPackage('Премиум', 26000, this)">
                 <div class="pkg-info">
                     <div>Премиум</div>
                     <span>Днище + Арки + Скрытые полости</span>
                 </div>
-                <div class="pkg-price">26 000 ₽</div>
+                <div class="pkg-price" id="price-prm">26 000 ₽</div>
             </div>
         </div>
 
@@ -197,15 +198,22 @@
 
     <script>
         let tg = window.Telegram.WebApp;
-        let carPrice = 0;
-        let packagePrice = 15000;
-        let selectedCar = "Легковая";
-        let selectedPackage = "Стандарт";
+        
+        // Базовые цены пакетов (без учета авто)
+        const BASE_STD = 15000;
+        const BASE_PRM = 26000;
+
+        // Текущие состояния
+        let currentCarSurcharge = 0; // Наценка за класс авто
+        let currentPackageBase = BASE_STD; // Выбранный пакет (базовая цена)
+        
+        let selectedCarName = "Легковая";
+        let selectedPackageName = "Стандарт";
 
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Настройка главной кнопки Telegram
+        // Инициализация кнопки
         tg.MainButton.setParams({
             text: 'ЗАПИСАТЬСЯ: 15 000 ₽',
             color: '#f39c12',
@@ -213,49 +221,79 @@
             is_visible: true
         });
 
-        // Установка даты (минимум — завтра)
+        // Настройка календаря
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('date_input').value = tomorrow.toISOString().split('T')[0];
-        document.getElementById('date_input').setAttribute('min', tomorrow.toISOString().split('T')[0]);
+        const minDate = tomorrow.toISOString().split('T')[0];
+        document.getElementById('date_input').value = minDate;
+        document.getElementById('date_input').setAttribute('min', minDate);
 
-        function setCar(name, price, el) {
+        // Функция звонка
+        function makeCall() {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.openLink('tel:+79623133313');
+        }
+
+        // Выбор авто
+        function setCar(name, surcharge, el) {
+            // Визуал активной кнопки
             document.querySelectorAll('.car-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            carPrice = price;
-            selectedCar = name;
-            tg.HapticFeedback.impactOccurred('medium');
-            updateUI();
+            
+            // Обновляем логику
+            currentCarSurcharge = surcharge;
+            selectedCarName = name;
+            
+            // Обновляем ЦЕНЫ В КАРТОЧКАХ ПАКЕТОВ
+            updatePackageCardsVisual();
+            
+            tg.HapticFeedback.impactOccurred('light');
+            updateMainButton();
         }
 
-        function setPackage(name, price, el) {
-            document.querySelectorAll('.package-option, .package-card').forEach(i => i.classList.remove('active'));
+        // Выбор пакета
+        function setPackage(name, basePrice, el) {
+            document.querySelectorAll('.package-card').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            packagePrice = price;
-            selectedPackage = name;
+            
+            currentPackageBase = basePrice;
+            selectedPackageName = name;
+            
             tg.HapticFeedback.selectionChanged();
-            updateUI();
+            updateMainButton();
         }
 
-        function updateUI() {
-            const total = carPrice + packagePrice;
+        // Функция обновления цен внутри карточек
+        function updatePackageCardsVisual() {
+            const stdTotal = BASE_STD + currentCarSurcharge;
+            const prmTotal = BASE_PRM + currentCarSurcharge;
+
+            document.getElementById('price-std').innerText = stdTotal.toLocaleString() + ' ₽';
+            document.getElementById('price-prm').innerText = prmTotal.toLocaleString() + ' ₽';
+        }
+
+        // Обновление главной кнопки "Записаться"
+        function updateMainButton() {
+            const total = currentPackageBase + currentCarSurcharge;
             tg.MainButton.setText(`ЗАПИСАТЬСЯ: ${total.toLocaleString()} ₽`);
         }
 
-        // Логика отправки данных
+        // Отправка данных боту
         tg.MainButton.onClick(function() {
             const model = document.getElementById('car_model').value.trim();
             if (model.length < 3) {
-                tg.showAlert("Пожалуйста, введите марку и модель вашего автомобиля.");
+                tg.showAlert("Пожалуйста, введите марку и модель автомобиля.");
                 return;
             }
             
+            const totalSum = currentPackageBase + currentCarSurcharge;
+            
             const data = {
-                car: selectedCar,
+                car: selectedCarName,
                 model: model,
-                package: selectedPackage,
+                package: selectedPackageName,
                 date: document.getElementById('date_input').value,
-                total: (carPrice + packagePrice)
+                total: totalSum
             };
             
             tg.sendData(JSON.stringify(data));
