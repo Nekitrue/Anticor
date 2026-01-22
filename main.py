@@ -1,69 +1,75 @@
-import json
 import asyncio
+import json
+import logging
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-# Ваши данные
+# ВАШИ ДАННЫЕ
 TOKEN = '8311024618:AAHvEmWzlMwBeStlsPOXud6yowzrA350HRo'
-ADMIN_ID = 8311024618  # Ваш ID теперь прописан здесь
+ADMIN_ID = 8311024618 
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-@dp.message(Command("start"))
-async def start(message: types.Message):
-    # Ссылка на ваше приложение на GitHub
+# Логирование (чтобы видеть ошибки в консоли)
+logging.basicConfig(level=logging.INFO)
+
+@dp.message(CommandStart())
+async def start_command(message: types.Message):
+    # Кнопка открытия приложения
     web_app = types.WebAppInfo(url="https://nekitrue.github.io/anticor-bot/")
-    kb = [[types.KeyboardButton(text="🚗 Записаться на антикор", web_app=web_app)]]
+    
+    # Создаем кнопку в меню (Reply Keyboard)
+    kb = [
+        [types.KeyboardButton(text="🚗 ЗАПИСАТЬСЯ НА АНТИКОР", web_app=web_app)]
+    ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer("Привет! Нажми на кнопку ниже для расчета цены и записи:", reply_markup=keyboard)
+    
+    await message.answer(
+        "✨ <b>Добро пожаловать в Anticor Pro!</b>\n\n"
+        "Воспользуйтесь кнопкой ниже, чтобы рассчитать стоимость "
+        "защиты вашего авто и записаться к нам.",
+        reply_markup=keyboard,
+        parse_mode="HTML"
+    )
 
 @dp.message(lambda message: message.web_app_data)
 async def handle_order(message: types.Message):
-    # Парсим данные из Mini App
-    data = json.loads(message.web_app_data.data)
-    user_id = message.from_user.id
-    username = message.from_user.username
+    try:
+        data = json.loads(message.web_app_data.data)
+        
+        # Текст для вас
+        admin_text = (
+            f"🔔 <b>НОВЫЙ ЗАКАЗ!</b>\n\n"
+            f"🚘 Авто: {data['model']}\n"
+            f"📐 Класс: {data['car']}\n"
+            f"🛠 Пакет: {data['package']}\n"
+            f"📅 Дата: {data['date']}\n"
+            f"💰 Сумма: {data['total']} ₽\n\n"
+            f"👤 Клиент: @{message.from_user.username or 'скрыт'}"
+        )
 
-    # 1. Сообщение для вас (админа)
-    admin_text = (
-        f"🔔 <b>НОВЫЙ ЗАКАЗ</b>\n\n"
-        f"🚘 <b>Авто:</b> {data['model']}\n"
-        f"📐 <b>Класс:</b> {data['car']}\n"
-        f"🛠 <b>Пакет:</b> {data['package']}\n"
-        f"📅 <b>Дата:</b> {data['date']}\n"
-        f"💰 <b>Итого:</b> {data['total']} ₽\n\n"
-        f"👤 <b>Клиент:</b> @{username or 'скрыт'}\n"
-    )
+        # Кнопка связи
+        builder = InlineKeyboardBuilder()
+        link = f"https://t.me/{message.from_user.username}" if message.from_user.username else f"tg://user?id={message.from_user.id}"
+        builder.row(types.InlineKeyboardButton(text="💬 Написать клиенту", url=link))
 
-    # Кнопка для быстрой связи
-    builder = InlineKeyboardBuilder()
-    link = f"https://t.me/{username}" if username else f"tg://user?id={user_id}"
-    builder.row(types.InlineKeyboardButton(text="💬 Написать клиенту", url=link))
-
-    # Отправка вам
-    await bot.send_message(
-        chat_id=ADMIN_ID, 
-        text=admin_text, 
-        parse_mode="HTML", 
-        reply_markup=builder.as_markup()
-    )
-
-    # 2. Сообщение клиенту
-    client_text = (
-        f"✅ <b>Запись успешно создана!</b>\n\n"
-        f"Автомобиль: <b>{data['model']}</b>\n"
-        f"Пакет: {data['package']}\n\n"
-        f"📞 Мастер свяжется с вами для подтверждения.\n"
-        f"Наш номер: +79623133313"
-    )
-    
-    await message.answer(text=client_text, parse_mode="HTML")
+        # Отправка админу
+        await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML", reply_markup=builder.as_markup())
+        
+        # Ответ клиенту
+        await message.answer("✅ <b>Заявка принята!</b>\nМастер свяжется с вами в ближайшее время.", parse_mode="HTML")
+        
+    except Exception as e:
+        logging.error(f"Ошибка: {e}")
 
 async def main():
-    print("Бот ANTICOR запущен и работает...")
+    print("Бот успешно запущен и слушает команды...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Бот остановлен")
