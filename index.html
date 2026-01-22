@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anticor Center</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f0f0f5;
+            --tg-theme-text-color: #222222;
+            --tg-theme-hint-color: #999999;
+            --accent-color: #e67e22; 
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0; padding: 0; user-select: none;
+        }
+        .header {
+            background: #1c1c1c; color: white; padding: 20px 16px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+        .call-btn {
+            background: var(--accent-color); border: none; padding: 8px 12px;
+            border-radius: 20px; color: white; font-size: 12px; font-weight: bold; text-decoration: none;
+        }
+        .container { padding: 12px; }
+        .gallery-label { font-size: 13px; color: var(--tg-theme-hint-color); margin: 10px 0 5px 4px; text-transform: uppercase; }
+        .gallery-scroll {
+            display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .gallery-scroll::-webkit-scrollbar { display: none; }
+        .work-card {
+            min-width: 200px; height: 120px; background: #ddd; border-radius: 12px; flex-shrink: 0;
+            background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 10px;
+            color: white; font-weight: bold; font-size: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .section {
+            background: var(--tg-theme-bg-color); border-radius: 16px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 700; }
+        .car-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .car-item {
+            padding: 12px; border: 1.5px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 12px; text-align: center; transition: all 0.2s;
+        }
+        .car-item.active { border-color: var(--accent-color); background: rgba(230, 126, 34, 0.05); }
+        .package-select { display: flex; flex-direction: column; gap: 10px; }
+        .package-option {
+            padding: 12px; border: 1.5px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .package-option.active { border-color: var(--accent-color); }
+        .package-name { font-weight: 600; font-size: 14px; }
+        .package-price { color: var(--accent-color); font-weight: 700; }
+        input, textarea {
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color); font-size: 16px; box-sizing: border-box; margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>ANTICOR PRO</h1>
+            <div style="font-size: 10px; opacity: 0.6;">Защита кузова с гарантией</div>
+        </div>
+        <a href="tel:+79991234567" class="call-btn">ПОЗВОНИТЬ</a>
+    </div>
+    <div class="container">
+        <div class="gallery-label">Примеры наших работ:</div>
+        <div class="gallery-scroll">
+            <div class="work-card" style="background-image: url('https://placehold.co/400x300/222/fff?text=Photo+1')">Toyota Land Cruiser</div>
+            <div class="work-card" style="background-image: url('https://placehold.co/400x300/333/fff?text=Photo+2')">BMW X5</div>
+            <div class="work-card" style="background-image: url('https://placehold.co/400x300/444/fff?text=Photo+3')">Гарантия</div>
+        </div>
+        <div class="section">
+            <h3>Тип кузова</h3>
+            <div class="car-grid">
+                <div class="car-item active" onclick="setCar('Легковая', 0, this)"><div>🚗 Седан</div></div>
+                <div class="car-item" onclick="setCar('Кроссовер', 5000, this)"><div>🚙 SUV</div></div>
+                <div class="car-item" onclick="setCar('Рамник', 9000, this)"><div>🚜 Рамный</div></div>
+                <div class="car-item" onclick="setCar('Автобус', 12000, this)"><div>🚐 Бус</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Пакет обработки</h3>
+            <div class="package-select">
+                <div class="package-option active" onclick="setPackage('Стандарт', 15000, this)">
+                    <span class="package-name">Днище + Арки</span><span class="package-price">15 000 ₽</span>
+                </div>
+                <div class="package-option" onclick="setPackage('Премиум', 26000, this)">
+                    <span class="package-name">Полный</span><span class="package-price">26 000 ₽</span>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Желаемая дата и модель</h3>
+            <input type="date" id="date_input">
+            <textarea id="car_model" placeholder="Марка и модель авто..."></textarea>
+        </div>
+    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        let carPrice = 0; let packagePrice = 15000;
+        let selectedCar = "Легковая"; let selectedPackage = "Стандарт";
+        tg.expand();
+        tg.MainButton.setParams({ text: 'ЗАПИСАТЬСЯ: 15 000 ₽', color: '#e67e22', is_visible: true });
+        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('date_input').value = tomorrow.toISOString().split('T')[0];
+        function setCar(name, price, el) {
+            document.querySelectorAll('.car-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active'); carPrice = price; selectedCar = name;
+            tg.HapticFeedback.impactOccurred('light'); updateUI();
+        }
+        function setPackage(name, price, el) {
+            document.querySelectorAll('.package-option').forEach(i => i.classList.remove('active'));
+            el.classList.add('active'); packagePrice = price; selectedPackage = name;
+            tg.HapticFeedback.impactOccurred('medium'); updateUI();
+        }
+        function updateUI() {
+            const total = carPrice + packagePrice;
+            tg.MainButton.setText(`ЗАПИСАТЬСЯ: ${total.toLocaleString()} ₽`);
+        }
+        tg.MainButton.onClick(function() {
+            const model = document.getElementById('car_model').value;
+            if (model.length < 3) { tg.showAlert("Введите марку авто"); return; }
+            const data = { car: selectedCar, model: model, package: selectedPackage, date: document.getElementById('date_input').value, total: (carPrice + packagePrice) };
+            tg.sendData(JSON.stringify(data));
+        });
+    </script>
+</body>
+</html>
