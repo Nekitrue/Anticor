@@ -3,301 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anticor Center Premium</title>
+    <title>Anticor Neon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --card-bg: #1a1a1a;
-            --text-color: #ffffff;
-            --accent-color: #f39c12; 
-            --secondary-text: #aaaaaa;
+            --bg-dark: #050510;
+            --neon-pink: #ff00ff;
+            --neon-blue: #00f3ff;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-secondary: #a0a0a0;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 243, 255, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
             margin: 0; padding: 0;
-            line-height: 1.5;
-            user-select: none;
+            min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Шапка */
+        .container {
+            padding: 20px;
+            padding-bottom: 100px; /* Место под кнопку */
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Хедер с эффектом стекла */
         .header {
-            padding: 30px 20px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
             text-align: center;
-            border-bottom: 1px solid #222;
+            padding: 25px 0;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .header h1 {
-            margin: 0; font-size: 22px; letter-spacing: 2px;
-            color: var(--accent-color); text-transform: uppercase;
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
         }
 
-        /* Кнопка звонка */
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Кнопка звонка (Неоновая рамка) */
+        .call-btn-wrapper {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
         .call-btn {
-            display: inline-block;
-            margin-top: 15px;
-            background: var(--accent-color);
-            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
             padding: 10px 25px;
-            border-radius: 25px;
-            font-weight: bold;
+            border-radius: 30px;
+            font-weight: 600;
             font-size: 14px;
-            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-            cursor: pointer;
-            transition: transform 0.2s;
+            text-decoration: none;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .call-btn:active { transform: scale(0.95); }
 
-        .container { padding: 20px; padding-bottom: 40px; }
+        .call-btn:active {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
 
+        /* Заголовки секций */
         .section-title {
-            font-size: 11px; color: var(--secondary-text);
-            text-transform: uppercase; letter-spacing: 1.5px;
-            margin-bottom: 12px; margin-left: 5px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 25px 0 10px 5px;
         }
 
-        /* Сетка выбора авто */
+        /* Карточки (Glassmorphism) */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Сетка авто */
         .car-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .car-item {
-            background: var(--card-bg);
-            border: 1px solid #222;
-            border-radius: 16px;
-            padding: 20px 10px;
+            padding: 15px;
             text-align: center;
-            transition: all 0.2s ease;
             cursor: pointer;
+            position: relative;
         }
 
         .car-item.active {
-            border-color: var(--accent-color);
-            background: rgba(243, 156, 18, 0.05);
-            box-shadow: 0 0 15px rgba(243, 156, 18, 0.1);
+            background: rgba(255, 0, 255, 0.1);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2) inset;
         }
 
-        .car-icon { font-size: 28px; margin-bottom: 8px; display: block; }
-        .car-name { font-size: 14px; font-weight: 500; }
+        .car-icon { font-size: 32px; margin-bottom: 5px; display: block; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        .car-name { font-size: 13px; font-weight: 500; }
 
         /* Пакеты услуг */
-        .package-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-
-        .package-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid #222;
+        .package-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s;
+            padding: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
+            position: relative;
         }
 
-        .package-card.active {
-            border-color: var(--accent-color);
-            background: #222;
+        .package-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--glass-border);
+            transition: 0.3s;
         }
 
-        .pkg-info div { font-weight: bold; font-size: 16px; margin-bottom: 2px; }
-        .pkg-info span { font-size: 12px; color: var(--secondary-text); }
-        
-        /* Цены, которые будут меняться через JS */
-        .pkg-price { color: var(--accent-color); font-weight: 800; font-size: 17px; min-width: 80px; text-align: right; }
+        .package-item.active {
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent);
+            border-color: var(--neon-blue);
+        }
+
+        .package-item.active::before {
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .pkg-info div { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .pkg-info span { font-size: 12px; color: var(--text-secondary); }
+        .pkg-price { font-size: 18px; font-weight: 700; color: var(--neon-blue); text-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
 
         /* Поля ввода */
-        .input-group { margin-bottom: 20px; }
-        
-        input[type="date"], textarea {
+        input, textarea {
             width: 100%;
-            background: var(--card-bg);
-            border: 1px solid #222;
-            border-radius: 14px;
-            padding: 16px;
-            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
             font-size: 16px;
-            margin-top: 8px;
             box-sizing: border-box;
             outline: none;
+            transition: 0.3s;
             font-family: inherit;
         }
 
-        textarea { height: 90px; resize: none; }
-        input:focus, textarea:focus { border-color: var(--accent-color); }
-        
-        input::-webkit-calendar-picker-indicator { filter: invert(1); }
+        input:focus, textarea:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+        }
+
+        textarea { height: 80px; resize: none; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; }
+
+        /* НОВАЯ КНОПКА ЗАПИСИ (Фиксированная внизу) */
+        .main-btn-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .neon-button {
+            width: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), #b000b0);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neon-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
+        }
+
+        /* Анимация ошибки (тряска) */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.3s ease-in-out; border-color: red !important; }
+
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>MERCASOL PRO</h1>
-        <div style="font-size: 11px; color: var(--secondary-text); margin-top: 6px; letter-spacing: 1px;">ЦЕНТР АНТИКОРРОЗИЙНОЙ ЗАЩИТЫ</div>
-        
-        <div class="call-btn" onclick="makeCall()">
-            📞 ПОЗВОНИТЬ МАСТЕРУ
-        </div>
-    </div>
-
     <div class="container">
-        <div class="section-title">Класс автомобиля</div>
+        
+        <div class="header">
+            <h1>Anticor Pro</h1>
+            <div class="subtitle">Liquid Glass Protection</div>
+            
+            <div class="call-btn-wrapper">
+                <a href="tel:+79623133313" class="call-btn" onclick="tryCall(event)">
+                    <span>📞</span> Связаться с мастером
+                </a>
+            </div>
+        </div>
+
+        <div class="section-title">1. Класс автомобиля</div>
         <div class="car-grid">
-            <div class="car-item active" onclick="setCar('Легковая', 0, this)">
+            <div class="glass-card car-item active" onclick="setCar('Легковая', 0, this)">
                 <span class="car-icon">🚗</span>
                 <div class="car-name">Седан</div>
             </div>
-            <div class="car-item" onclick="setCar('Кроссовер', 5000, this)">
+            <div class="glass-card car-item" onclick="setCar('Кроссовер', 5000, this)">
                 <span class="car-icon">🚙</span>
                 <div class="car-name">Кроссовер</div>
             </div>
-            <div class="car-item" onclick="setCar('Рамник', 9000, this)">
+            <div class="glass-card car-item" onclick="setCar('Внедорожник', 9000, this)">
                 <span class="car-icon">🚜</span>
-                <div class="car-name">Внедорожник</div>
+                <div class="car-name">Рамный</div>
             </div>
-            <div class="car-item" onclick="setCar('Автобус', 12000, this)">
+            <div class="glass-card car-item" onclick="setCar('Микроавтобус', 12000, this)">
                 <span class="car-icon">🚐</span>
-                <div class="car-name">Микроавтобус</div>
+                <div class="car-name">Бус</div>
             </div>
         </div>
 
-        <div class="section-title">Комплекс услуг</div>
-        <div class="package-list">
-            <div class="package-card active" onclick="setPackage('Стандарт', 15000, this)">
-                <div class="pkg-info">
-                    <div>Стандарт</div>
-                    <span>Днище + Арки</span>
-                </div>
-                <div class="pkg-price" id="price-std">15 000 ₽</div>
+        <div class="section-title">2. Комплекс защиты</div>
+        <div class="glass-card package-item active" onclick="setPackage('Стандарт', 15000, this)">
+            <div class="pkg-info">
+                <div>Стандарт</div>
+                <span>Днище + Арки (Mercasol 3)</span>
             </div>
-            <div class="package-card" onclick="setPackage('Премиум', 26000, this)">
-                <div class="pkg-info">
-                    <div>Премиум</div>
-                    <span>Днище + Арки + Скрытые полости</span>
-                </div>
-                <div class="pkg-price" id="price-prm">26 000 ₽</div>
-            </div>
+            <div class="pkg-price" id="price-std">15 000 ₽</div>
         </div>
 
-        <div class="input-group">
-            <div class="section-title">Желаемая дата визита</div>
-            <input type="date" id="date_input">
+        <div class="glass-card package-item" onclick="setPackage('Премиум', 26000, this)">
+            <div class="pkg-info">
+                <div>Премиум</div>
+                <span>Полный цикл + Скрытые полости</span>
+            </div>
+            <div class="pkg-price" id="price-prm">26 000 ₽</div>
         </div>
 
-        <div class="input-group">
-            <div class="section-title">Марка и модель авто</div>
-            <textarea id="car_model" placeholder="Например: Toyota Land Cruiser 300, 2023 г.в."></textarea>
+        <div class="section-title">3. Детали записи</div>
+        <div class="glass-card" style="padding: 10px;">
+            <input type="date" id="date_input" style="margin-bottom: 10px;">
+            <textarea id="car_model" placeholder="Укажите марку и модель авто..."></textarea>
         </div>
+
+    </div>
+
+    <div class="main-btn-container">
+        <button class="neon-button" onclick="submitOrder()" id="order-btn">
+            Записаться: <span id="total-sum">15 000</span> ₽
+        </button>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        
-        // Базовые цены пакетов (без учета авто)
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        // Скрываем нативную кнопку, чтобы использовать свою
+        tg.MainButton.hide();
+
+        // Константы цен
         const BASE_STD = 15000;
         const BASE_PRM = 26000;
 
-        // Текущие состояния
-        let currentCarSurcharge = 0; // Наценка за класс авто
-        let currentPackageBase = BASE_STD; // Выбранный пакет (базовая цена)
-        
+        // Переменные состояния
+        let currentCarSurcharge = 0;
+        let currentPackageBase = BASE_STD;
         let selectedCarName = "Легковая";
         let selectedPackageName = "Стандарт";
 
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // Инициализация кнопки
-        tg.MainButton.setParams({
-            text: 'ЗАПИСАТЬСЯ: 15 000 ₽',
-            color: '#f39c12',
-            text_color: '#ffffff',
-            is_visible: true
-        });
+        // --- ЛОГИКА КАЛЬКУЛЯТОРА ---
 
-        // Настройка календаря
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const minDate = tomorrow.toISOString().split('T')[0];
-        document.getElementById('date_input').value = minDate;
-        document.getElementById('date_input').setAttribute('min', minDate);
-
-        // Функция звонка
-        function makeCall() {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.openLink('tel:+79623133313');
-        }
-
-        // Выбор авто
         function setCar(name, surcharge, el) {
-            // Визуал активной кнопки
+            // Визуал
             document.querySelectorAll('.car-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             
-            // Обновляем логику
+            // Данные
             currentCarSurcharge = surcharge;
             selectedCarName = name;
             
-            // Обновляем ЦЕНЫ В КАРТОЧКАХ ПАКЕТОВ
-            updatePackageCardsVisual();
-            
             tg.HapticFeedback.impactOccurred('light');
-            updateMainButton();
+            recalc();
         }
 
-        // Выбор пакета
         function setPackage(name, basePrice, el) {
-            document.querySelectorAll('.package-card').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.package-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             
             currentPackageBase = basePrice;
             selectedPackageName = name;
             
-            tg.HapticFeedback.selectionChanged();
-            updateMainButton();
+            tg.HapticFeedback.impactOccurred('medium');
+            recalc();
         }
 
-        // Функция обновления цен внутри карточек
-        function updatePackageCardsVisual() {
-            const stdTotal = BASE_STD + currentCarSurcharge;
-            const prmTotal = BASE_PRM + currentCarSurcharge;
+        function recalc() {
+            // Обновляем цены в списке пакетов (чтобы клиент видел, как они выросли)
+            const stdPrice = BASE_STD + currentCarSurcharge;
+            const prmPrice = BASE_PRM + currentCarSurcharge;
+            
+            document.getElementById('price-std').innerText = stdPrice.toLocaleString() + ' ₽';
+            document.getElementById('price-prm').innerText = prmPrice.toLocaleString() + ' ₽';
 
-            document.getElementById('price-std').innerText = stdTotal.toLocaleString() + ' ₽';
-            document.getElementById('price-prm').innerText = prmTotal.toLocaleString() + ' ₽';
-        }
-
-        // Обновление главной кнопки "Записаться"
-        function updateMainButton() {
+            // Обновляем итоговую кнопку
             const total = currentPackageBase + currentCarSurcharge;
-            tg.MainButton.setText(`ЗАПИСАТЬСЯ: ${total.toLocaleString()} ₽`);
+            document.getElementById('total-sum').innerText = total.toLocaleString();
         }
 
-        // Отправка данных боту
-        tg.MainButton.onClick(function() {
-            const model = document.getElementById('car_model').value.trim();
-            if (model.length < 3) {
-                tg.showAlert("Пожалуйста, введите марку и модель автомобиля.");
+        // --- ЛОГИКА ЗВОНКА ---
+
+        function tryCall(e) {
+            // Пытаемся вызвать через API Telegram
+            try {
+                tg.openLink('tel:+79623133313');
+                // Если сработало, отменяем стандартный переход по ссылке, 
+                // чтобы не было двойного открытия
+                e.preventDefault(); 
+            } catch (err) {
+                // Если API не сработало (старая версия TG), 
+                // сработает стандартный href="tel:..." из HTML-тега
+                console.log('API call failed, using default href');
+            }
+        }
+
+        // --- ЛОГИКА ОТПРАВКИ ЗАКАЗА ---
+
+        function submitOrder() {
+            const modelField = document.getElementById('car_model');
+            const modelValue = modelField.value.trim();
+            const dateValue = document.getElementById('date_input').value;
+
+            // Валидация
+            if (modelValue.length < 2) {
+                tg.HapticFeedback.notificationOccurred('error');
+                // Визуально трясем поле и красим рамку
+                modelField.classList.add('shake');
+                modelField.focus();
+                setTimeout(() => modelField.classList.remove('shake'), 500);
+                
+                // Показываем нативный алерт Telegram
+                tg.showAlert("Пожалуйста, напишите модель автомобиля (например: Mazda 6)");
                 return;
             }
-            
+
+            if (!dateValue) {
+                tg.showAlert("Пожалуйста, выберите дату.");
+                return;
+            }
+
+            // Подготовка данных
             const totalSum = currentPackageBase + currentCarSurcharge;
-            
             const data = {
                 car: selectedCarName,
-                model: model,
+                model: modelValue,
                 package: selectedPackageName,
-                date: document.getElementById('date_input').value,
+                date: dateValue,
                 total: totalSum
             };
+
+            // Отправка
+            tg.HapticFeedback.notificationOccurred('success');
             
+            // ВАЖНО: sendData отправляет данные боту. 
+            // После этого Mini App автоматически закрывается.
             tg.sendData(JSON.stringify(data));
-        });
+        }
+
+        // Инициализация даты (завтра)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dateStr = tomorrow.toISOString().split('T')[0];
+        document.getElementById('date_input').value = dateStr;
+        document.getElementById('date_input').setAttribute('min', dateStr);
+
     </script>
 </body>
 </html>
